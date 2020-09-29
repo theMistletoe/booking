@@ -1,32 +1,28 @@
 package example.application.service.booking;
 
-import example.domain.model.booking.BookingNumber;
 import example.domain.model.booking.Cargo;
 import example.domain.model.booking.Voyage;
-import org.springframework.stereotype.Service;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-/**
- * 予約
- */
-@Service
-public class BookingService {
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-    // TODO コマンドとクエリーの分離
+@SpringBootTest
+class BookingServiceTest {
 
-    /**
-     * 限度を超えていなかったら予約して予約番号を返す
-     * @param voyage
-     * @param cargo
-     * @return
-     */
-    BookingNumber booking(Voyage voyage, Cargo cargo) {
+    @Autowired
+    BookingService bookingService;
 
-        // TODO ビジネスルールの明示（クラスを使って）
-        // TODO ビジネスロジックの記述をdomain.modelに移動
-        double maxBooking = voyage.capacity() * 1.1 ;
-        if (voyage.bookedSize() + cargo.size() > maxBooking)
-            throw new IllegalStateException("最大積載量オーバー");
+    @Test
+    @DisplayName("オーバーブッキング")
+    void overBooking() {
+        Voyage voyage = new Voyage();
+        voyage.addBookedSize(100);
+        Cargo cargo = new Cargo(20);
 
-        return BookingNumber.generate();
+        assertThrows(IllegalStateException.class, () ->
+                bookingService.booking(voyage, cargo));
     }
 }
